@@ -15,14 +15,46 @@ variable "cluster_name" {
   default     = "data-discovery-cluster"
 }
 
-variable "network" {
-  description = "Self-link or name of the VPC network"
+# Shared VPC Configuration
+# For same-project VPC: Set network_project_id = project_id (or leave unset, defaults to project_id)
+# For cross-project Shared VPC: Set network_project_id to the host project ID
+
+variable "network_project_id" {
+  description = "Project ID where the VPC network resides (host project for Shared VPC). Defaults to project_id if not specified."
   type        = string
+  default     = ""
+}
+
+variable "network" {
+  description = "VPC network for GKE and Composer. Use self-link format: projects/PROJECT_ID/global/networks/NETWORK_NAME or short name 'NETWORK_NAME' (for same project)"
+  type        = string
+
+  validation {
+    condition     = can(regex("^projects/.+/global/networks/.+$", var.network)) || can(regex("^[a-z][-a-z0-9]*$", var.network))
+    error_message = "Network must be either a self-link (projects/PROJECT_ID/global/networks/NETWORK_NAME) or a short name (network-name)."
+  }
 }
 
 variable "subnetwork" {
-  description = "Self-link or name of the subnetwork"
+  description = "VPC subnetwork for GKE and Composer. Use self-link format: projects/PROJECT_ID/regions/REGION/subnetworks/SUBNET_NAME or short name 'SUBNET_NAME' (for same project)"
   type        = string
+
+  validation {
+    condition     = can(regex("^projects/.+/regions/.+/subnetworks/.+$", var.subnetwork)) || can(regex("^[a-z][-a-z0-9]*$", var.subnetwork))
+    error_message = "Subnetwork must be either a self-link (projects/PROJECT_ID/regions/REGION/subnetworks/SUBNET_NAME) or a short name (subnet-name)."
+  }
+}
+
+variable "pods_secondary_range_name" {
+  description = "Name of the secondary IP range for GKE pods (must exist in the subnetwork)"
+  type        = string
+  default     = "podcloud"
+}
+
+variable "services_secondary_range_name" {
+  description = "Name of the secondary IP range for GKE services (must exist in the subnetwork)"
+  type        = string
+  default     = "servicecloud"
 }
 
 variable "machine_type" {

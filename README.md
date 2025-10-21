@@ -70,6 +70,31 @@ This Terraform configuration deploys a comprehensive data discovery infrastructu
 - **gcloud CLI**: Authenticated and configured ([Install Guide](https://cloud.google.com/sdk/docs/install))
 - **Permissions**: Owner or Editor role on the project (for initial setup)
 - **Existing Network**: VPC and subnet already configured, or use "default" VPC
+  - Subnet must have secondary IP ranges for GKE pods and services
+
+## Network Configuration
+
+This infrastructure supports both **same-project VPC** and **cross-project Shared VPC** deployments:
+
+- **Same-Project VPC**: Network and resources in the same GCP project (simpler setup)
+- **Cross-Project Shared VPC**: Network in a host project, resources in a service project (enterprise setup)
+
+### Key Features
+
+- ✅ **Flexible Network References**: Supports both short names and self-link formats
+- ✅ **Automatic IAM Configuration**: Grants required `compute.networkUser` permissions
+- ✅ **Configurable Secondary Ranges**: Customize GKE pod and service IP ranges
+- ✅ **Validation**: Built-in validation for network format and configuration
+
+### Configuration Variables
+
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+| `network_project_id` | Host project ID (for Shared VPC) | No | Same as `project_id` |
+| `network` | VPC network (name or self-link) | Yes | - |
+| `subnetwork` | VPC subnet (name or self-link) | Yes | - |
+| `pods_secondary_range_name` | Secondary range for GKE pods | No | `"podcloud"` |
+| `services_secondary_range_name` | Secondary range for GKE services | No | `"servicecloud"` |
 
 ## Quick Start
 

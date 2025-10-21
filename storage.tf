@@ -120,11 +120,13 @@ resource "google_storage_bucket_iam_member" "jsonl_bucket_writer" {
 # Allow Vertex AI Search to read from JSONL bucket (for ingestion)
 # Note: This will be configured when the Vertex AI Search data store is created
 # For now, we'll grant the project's default Vertex AI service account access
-resource "google_storage_bucket_iam_member" "jsonl_bucket_vertex_reader" {
-  bucket = google_storage_bucket.jsonl_bucket.name
-  role   = "roles/storage.objectViewer"
-  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
-}
+# TEMPORARILY COMMENTED OUT: Service account needs to be created first by using Vertex AI
+# Uncomment and apply again after Vertex AI has been used at least once
+# resource "google_storage_bucket_iam_member" "jsonl_bucket_vertex_reader" {
+#   bucket = google_storage_bucket.jsonl_bucket.name
+#   role   = "roles/storage.objectViewer"
+#   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+# }
 
 # Allow discovery service account to write to reports bucket
 resource "google_storage_bucket_iam_member" "reports_bucket_writer" {

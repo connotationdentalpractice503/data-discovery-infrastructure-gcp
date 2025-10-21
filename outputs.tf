@@ -71,3 +71,53 @@ output "docker_push_command_example" {
   value       = "docker tag data-discovery-mcp:latest ${google_artifact_registry_repository.mcp_images.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.mcp_images.repository_id}/mcp:latest && docker push ${google_artifact_registry_repository.mcp_images.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.mcp_images.repository_id}/mcp:latest"
 }
 
+# Shared VPC Configuration Outputs
+output "network_configuration" {
+  description = "Network configuration details"
+  value = {
+    network_project_id            = local.network_project_id
+    is_shared_vpc                 = local.is_shared_vpc
+    network                       = var.network
+    subnetwork                    = var.subnetwork
+    pods_secondary_range_name     = var.pods_secondary_range_name
+    services_secondary_range_name = var.services_secondary_range_name
+  }
+}
+
+output "shared_vpc_setup_notes" {
+  description = "Notes about Shared VPC configuration"
+  value = local.is_shared_vpc ? join("\n", [
+    "",
+    "✓ Shared VPC Configuration Detected",
+    "",
+    "Network Project (Host): ${local.network_project_id}",
+    "Service Project: ${var.project_id}",
+    "",
+    "IAM bindings have been created to grant compute.networkUser role to:",
+    "- GKE service account: ${var.enable_gke ? google_service_account.gke_sa[0].email : "N/A (GKE disabled)"}",
+    "- Composer service account: ${google_service_account.composer_sa.email}",
+    "- Google-managed service accounts (GKE & Composer API)",
+    "",
+    "Prerequisites verified:",
+    "✓ Service accounts granted compute.networkUser on subnet: ${var.subnetwork}",
+    "✓ Secondary IP ranges configured: ${var.pods_secondary_range_name}, ${var.services_secondary_range_name}",
+    "",
+    "If deployment fails with permission errors, ensure:",
+    "1. Service project is attached to host project as Shared VPC service project",
+    "2. Required APIs are enabled in both host and service projects",
+    "3. You have permissions to modify IAM bindings in the host project",
+    ""
+  ]) : join("\n", [
+    "",
+    "✓ Same-Project VPC Configuration",
+    "",
+    "Network and resources are in the same project: ${var.project_id}",
+    "No cross-project Shared VPC setup required.",
+    "",
+    "Network: ${var.network}",
+    "Subnetwork: ${var.subnetwork}",
+    "Secondary ranges: ${var.pods_secondary_range_name}, ${var.services_secondary_range_name}",
+    ""
+  ])
+}
+

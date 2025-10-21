@@ -5,15 +5,52 @@
 project_id = "YOUR_PROJECT_ID"
 region     = "us-central1"
 
-# Network Configuration (existing VPC)
-# Replace with your VPC network and subnet paths
-# Or use "default" for default VPC
-network    = "projects/YOUR_PROJECT_ID/global/networks/YOUR_NETWORK_NAME"
-subnetwork = "projects/YOUR_PROJECT_ID/regions/us-central1/subnetworks/YOUR_SUBNET_NAME"
-
-# For default VPC, use:
+# ------------------------------------------------------------------------------
+# Network Configuration
+# ------------------------------------------------------------------------------
+# This infrastructure supports both same-project and cross-project Shared VPC
+#
+# OPTION 1: Same-Project VPC (network and project in same GCP project)
+# Use short names or self-links
+# network_project_id can be omitted (defaults to project_id)
+#
+# Example with short names (for default VPC):
 # network    = "default"
 # subnetwork = "default"
+#
+# Example with self-links (for custom VPC):
+# network    = "projects/YOUR_PROJECT_ID/global/networks/YOUR_NETWORK_NAME"
+# subnetwork = "projects/YOUR_PROJECT_ID/regions/us-central1/subnetworks/YOUR_SUBNET_NAME"
+#
+# OPTION 2: Cross-Project Shared VPC (network in host project, resources in service project)
+# Must use self-link format and specify network_project_id
+#
+# Example:
+# network_project_id = "YOUR_HOST_PROJECT_ID"
+# network            = "projects/YOUR_HOST_PROJECT_ID/global/networks/YOUR_NETWORK_NAME"
+# subnetwork         = "projects/YOUR_HOST_PROJECT_ID/regions/us-central1/subnetworks/YOUR_SUBNET_NAME"
+#
+# Prerequisites:
+# - Subnet must have secondary IP ranges for GKE pods and services
+# - For Shared VPC: service project must be attached to host project
+# - For Shared VPC: service accounts will be granted compute.networkUser role
+# ------------------------------------------------------------------------------
+
+# Network Project ID (host project for Shared VPC)
+# Leave commented out for same-project VPC (defaults to project_id)
+# Uncomment and set for cross-project Shared VPC
+# network_project_id = "YOUR_HOST_PROJECT_ID"
+
+# VPC Network (use self-link for Shared VPC, short name or self-link for same-project)
+network = "projects/YOUR_PROJECT_ID/global/networks/YOUR_NETWORK_NAME"
+
+# VPC Subnetwork (use self-link for Shared VPC, short name or self-link for same-project)
+subnetwork = "projects/YOUR_PROJECT_ID/regions/us-central1/subnetworks/YOUR_SUBNET_NAME"
+
+# Secondary IP range names for GKE (these must exist in your subnet)
+# Check your subnet's secondary ranges with: gcloud compute networks subnets describe SUBNET_NAME --region=REGION
+pods_secondary_range_name     = "podcloud"       # Default: "podcloud"
+services_secondary_range_name = "servicecloud"   # Default: "servicecloud"
 
 # GKE Cluster Configuration
 # Set enable_gke to false to skip GKE deployment (useful for Composer-only setups)
